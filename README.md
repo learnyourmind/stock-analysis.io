@@ -1,6 +1,7 @@
 # stock-analysis.io
 
-##Stock Analysis 
+## Stock Analysis 
+
 ### Controls you can tune before generating:
 
 Toggle any of the 16 sections on or off
