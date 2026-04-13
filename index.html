@@ -1,0 +1,453 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#F0D080;--gold-dim:#8A6D30;
+  --ink:var(--color-text-primary);--muted:var(--color-text-secondary);
+  --surface:var(--color-background-primary);--raised:var(--color-background-secondary);
+  --border:var(--color-border-tertiary);--border2:var(--color-border-secondary);
+}
+body{font-family:'DM Sans',sans-serif;color:var(--ink);background:transparent;padding:0}
+.header{padding:2.5rem 2rem 1.5rem;text-align:center;border-bottom:0.5px solid var(--border)}
+.brand{font-family:'Playfair Display',serif;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+h1{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;line-height:1.15;margin-bottom:0.5rem}
+.tagline{font-size:13px;color:var(--muted);letter-spacing:0.05em}
+.ticker-zone{padding:2rem;max-width:640px;margin:0 auto}
+.input-row{display:flex;gap:10px;align-items:stretch;margin-bottom:1.5rem}
+.ticker-input{flex:1;font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;padding:0.75rem 1rem;border:2px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--ink);outline:none;transition:border-color 0.2s}
+.ticker-input:focus{border-color:var(--gold)}
+.ticker-input::placeholder{color:var(--muted);font-weight:400;font-size:1rem;letter-spacing:0.02em}
+.generate-btn{padding:0.75rem 1.5rem;background:var(--gold);color:#1a1200;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;border:none;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background 0.2s,transform 0.1s}
+.generate-btn:hover{background:var(--gold-light)}
+.generate-btn:active{transform:scale(0.98)}
+.sections-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;font-weight:500}
+.sections-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:1.5rem}
+.section-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;border:0.5px solid var(--border2);border-radius:6px;cursor:pointer;user-select:none;font-size:12px;transition:all 0.15s;background:var(--surface)}
+.section-chip.active{border-color:var(--gold);background:rgba(201,168,76,0.08)}
+.section-chip .dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;transition:all 0.15s;position:relative}
+.section-chip.active .dot{background:var(--gold);border-color:var(--gold)}
+.section-chip .dot::after{content:'✓';font-size:9px;color:#1a1200;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none}
+.section-chip.active .dot::after{display:block}
+.section-chip span{color:var(--ink);line-height:1.3}
+.depth-row{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;padding:0.75rem 1rem;border:0.5px solid var(--border);border-radius:8px;background:var(--raised)}
+.depth-row label{font-size:12px;color:var(--muted);flex-shrink:0}
+.depth-row select{flex:1;font-size:13px;padding:4px 8px;border:0.5px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.output-zone{padding:0 2rem 2rem;max-width:640px;margin:0 auto}
+.output-card{border:0.5px solid var(--border2);border-radius:12px;overflow:hidden;display:none}
+.output-card.visible{display:block}
+.output-header{padding:1rem 1.25rem;background:var(--raised);border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.output-ticker-badge{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;letter-spacing:0.08em;color:var(--gold)}
+.output-meta{font-size:11px;color:var(--muted)}
+.prompt-body{padding:1.25rem;background:var(--surface);position:relative}
+.prompt-text{font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;color:var(--ink);white-space:pre-wrap;word-break:break-word;max-height:520px;overflow-y:auto;padding-right:4px}
+.prompt-text::-webkit-scrollbar{width:4px}
+.prompt-text::-webkit-scrollbar-track{background:transparent}
+.prompt-text::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.copy-row{display:flex;gap:8px;padding:1rem 1.25rem;border-top:0.5px solid var(--border);background:var(--raised)}
+.copy-btn{flex:1;padding:8px 12px;font-size:13px;cursor:pointer;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface);color:var(--ink);transition:all 0.15s}
+.copy-btn:hover{border-color:var(--gold);color:var(--gold)}
+.copy-btn.primary{background:var(--gold);color:#1a1200;border-color:var(--gold);font-weight:500}
+.copy-btn.primary:hover{background:var(--gold-light)}
+.send-btn{flex:1;padding:8px 12px;font-size:13px;cursor:pointer;border-radius:6px;border:0.5px solid var(--border2);background:var(--surface);color:var(--ink);transition:all 0.15s}
+.send-btn:hover{border-color:var(--gold);color:var(--gold)}
+.section-divider{border:none;border-top:0.5px solid var(--border);margin:1.5rem 0}
+.char-count{font-size:11px;color:var(--muted);text-align:right;padding:0 1.25rem 0.75rem;background:var(--raised)}
+.notice{font-size:11px;color:var(--muted);text-align:center;padding:0 2rem 1.5rem;line-height:1.6}
+</style>
+
+<h2 class="sr-only">Wall Street master prompt generator — enter a ticker symbol to generate a comprehensive equity research prompt</h2>
+
+<div class="header">
+  <div class="brand">Equity Intelligence Suite</div>
+  <h1>Wall Street<br>Master Prompt</h1>
+  <p class="tagline">Institutional-grade analysis prompts for any ticker</p>
+</div>
+
+<div class="ticker-zone">
+  <div class="input-row">
+    <input class="ticker-input" id="tickerInput" type="text" placeholder="Enter ticker (e.g. GOOG)" maxlength="8" autocomplete="off" spellcheck="false" />
+    <button class="generate-btn" onclick="generatePrompt()">Generate ↗</button>
+  </div>
+
+  <div class="sections-label">Include analysis sections</div>
+  <div class="sections-grid" id="sectionsGrid"></div>
+
+  <div class="depth-row">
+    <label>Analysis depth</label>
+    <select id="depthSelect">
+      <option value="standard">Standard — thorough institutional report</option>
+      <option value="deep" selected>Deep dive — hedge fund level detail</option>
+      <option value="ultra">Ultra — sell-side initiation of coverage</option>
+    </select>
+  </div>
+
+  <div class="depth-row" style="margin-bottom:0">
+    <label>Output format</label>
+    <select id="formatSelect">
+      <option value="structured">Structured with headers &amp; tables</option>
+      <option value="narrative">Narrative prose with data callouts</option>
+      <option value="brief">Executive brief — bullets &amp; key numbers</option>
+    </select>
+  </div>
+</div>
+
+<div class="output-zone">
+  <div class="output-card" id="outputCard">
+    <div class="output-header">
+      <div>
+        <div class="output-ticker-badge" id="outputTicker">GOOG</div>
+        <div class="output-meta" id="outputMeta">12 sections · Deep dive · Structured</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted)" id="sectionCount"></div>
+    </div>
+    <div class="prompt-body">
+      <div class="prompt-text" id="promptText"></div>
+    </div>
+    <div class="char-count" id="charCount"></div>
+    <div class="copy-row">
+      <button class="copy-btn primary" onclick="copyPrompt()">Copy prompt</button>
+      <button class="send-btn" onclick="sendToChat()">Send to Claude ↗</button>
+    </div>
+  </div>
+</div>
+
+<p class="notice">Paste this prompt into any Claude conversation, ChatGPT, or Gemini session.<br>For best results, enable web search in your AI of choice.</p>
+
+<script>
+const SECTIONS = [
+  {id:'business', label:'Business model & revenue streams', default:true},
+  {id:'moat', label:'Competitive moat analysis', default:true},
+  {id:'financials5y', label:'5-year financial deep dive', default:true},
+  {id:'valuation', label:'DCF & valuation vs peers', default:true},
+  {id:'risks', label:'Risk matrix & ranking', default:true},
+  {id:'growth', label:'Future growth potential (5–10y)', default:true},
+  {id:'earnings', label:'Latest earnings breakdown', default:true},
+  {id:'hedge', label:'Hedge fund investment thesis', default:true},
+  {id:'debate', label:'Bull vs bear analyst debate', default:true},
+  {id:'scenarios', label:'Bull / base / bear scenarios', default:true},
+  {id:'macro', label:'Macro & sector tailwinds', default:true},
+  {id:'insider', label:'Insider activity & institutional flow', default:false},
+  {id:'technical', label:'Technical price structure & levels', default:false},
+  {id:'esg', label:'ESG & governance factors', default:false},
+  {id:'catalyst', label:'Near-term catalysts calendar', default:true},
+  {id:'options', label:'Options market & sentiment signals', default:false},
+];
+
+const DEPTH_CTX = {
+  standard: 'Write with the depth and precision of a senior sell-side equity research analyst at a top-tier investment bank. Include specific data points, percentages, and year-over-year comparisons. Be thorough but efficient.',
+  deep: 'Write with the depth and precision of a senior portfolio manager at a top-tier hedge fund who is conducting comprehensive due diligence before a potential position of $50M+. Leave no stone unturned. Include specific data, historical context, peer benchmarking, and nuanced qualitative analysis. Identify non-obvious risks and opportunities that most retail analysts miss.',
+  ultra: 'Write at the level of a sell-side analyst initiating coverage for the first time at a bulge-bracket bank. This is a full initiation report intended for institutional clients managing multi-billion dollar portfolios. Be exhaustive. Include proprietary frameworks, scenario trees, sensitivity tables, and a clear investment conclusion with a 12-month price target and rating (Buy/Hold/Sell).'
+};
+
+const FORMAT_CTX = {
+  structured: 'Format each section with clear headers, subheaders, and data tables where appropriate. Use a design that is visually hierarchical and easy to scan. Separate key metrics into callout boxes.',
+  narrative: 'Write in flowing analytical prose with data points woven naturally into the narrative. Avoid excessive bullets. Mimic the style of a premium equity research report from Goldman Sachs or Morgan Stanley.',
+  brief: 'Use concise executive-style bullets with bold key numbers highlighted. Each section should lead with a one-sentence verdict, then supporting data points. Ideal for fast scanning by a time-pressed portfolio manager.'
+};
+
+const SECTION_PROMPTS = {
+  business: `## SECTION 1 — BUSINESS MODEL & REVENUE STREAMS
+Act as a senior equity research analyst. For [TICKER]:
+- Map every revenue stream with approximate percentage of total revenue
+- Explain the unit economics of each major segment (revenue per user, take rate, gross margin by segment)
+- Identify which segments are growing vs declining and why
+- Explain the flywheel or compounding mechanism in the business model
+- Assess how durable each revenue stream is (cyclical vs recurring vs one-time)
+- Compare business model to closest peers and highlight structural differences`,
+
+  moat: `## SECTION 2 — COMPETITIVE MOAT ANALYSIS
+Evaluate the competitive moat of [TICKER] across all five dimensions:
+1. Brand power — How strong is brand loyalty? What is the premium commanded?
+2. Network effects — Are there direct/indirect network effects? How defensible?
+3. Switching costs — What is the cost (time, money, risk) for a customer to leave?
+4. Cost advantage — Do they have structural cost advantages at scale?
+5. Proprietary technology / patents / data — What is truly defensible?
+
+Rate the overall moat from 1–10 with justification.
+Compare explicitly with top 3 competitors on each dimension.
+Identify where the moat is widening vs narrowing.`,
+
+  financials5y: `## SECTION 3 — 5-YEAR FINANCIAL DEEP DIVE
+Analyze the last 5 years of financials for [TICKER]. Include:
+- Revenue growth (absolute, CAGR, acceleration/deceleration trends)
+- Gross profit and gross margin trends
+- Operating income and operating leverage
+- Net income and EPS growth (GAAP and non-GAAP)
+- Free cash flow generation and FCF margin trends
+- Debt levels, net debt/EBITDA, interest coverage ratio
+- Return on Equity (ROE), Return on Invested Capital (ROIC), Return on Assets (ROA)
+- Working capital dynamics and cash conversion cycle
+- CapEx intensity and how it's changing
+
+Verdict: Is this company financially strengthening, stable, or deteriorating?`,
+
+  valuation: `## SECTION 4 — VALUATION ANALYSIS
+Conduct a comprehensive valuation of [TICKER]:
+- P/E ratio (trailing and forward) vs 5-year average and sector peers
+- EV/EBITDA vs peers
+- Price-to-Free-Cash-Flow analysis
+- PEG ratio — is growth being appropriately priced in?
+- DCF analysis: walk through assumptions for revenue growth, margins, WACC, terminal growth rate, and arrive at an intrinsic value estimate
+- Sum-of-the-parts valuation if applicable
+- Precedent transactions or acquisition multiples in the sector
+- Conclusion: Undervalued, fairly valued, or overvalued? By how much?`,
+
+  risks: `## SECTION 5 — RISK MATRIX & RANKING
+Identify and rank ALL major investment risks for [TICKER]:
+
+For each risk include: Probability (Low/Med/High), Severity (1–5), Time Horizon, Mitigation factors.
+
+Risk categories to cover:
+- Macroeconomic & interest rate risks
+- Competitive disruption (who could kill this company?)
+- Regulatory & antitrust threats
+- Technology disruption (AI, platforms, new entrants)
+- Execution & management risks
+- Financial risks (leverage, liquidity, refinancing)
+- Geopolitical & supply chain risks
+- Key-person or key-customer concentration risk
+
+Rank from most dangerous to least. Identify the single biggest non-consensus risk.`,
+
+  growth: `## SECTION 6 — FUTURE GROWTH POTENTIAL (5–10 YEAR VIEW)
+Project the long-term growth trajectory of [TICKER]:
+- What is the Total Addressable Market (TAM) today and in 10 years?
+- What is the company's realistic market share trajectory?
+- Identify 3–5 major growth vectors: new products, geographies, adjacencies
+- Assess AI and technology advantages: is this company a net beneficiary or disruptor?
+- What would revenue and earnings look like in 5 years under base case?
+- What is the biggest optionality not priced into the stock?
+- What needs to go right vs wrong for the long-term thesis to hold?`,
+
+  earnings: `## SECTION 7 — LATEST EARNINGS REPORT BREAKDOWN
+Break down [TICKER]'s most recent quarterly earnings:
+- Revenue vs analyst consensus estimate (beat/miss by how much?)
+- EPS vs consensus (GAAP and non-GAAP)
+- Key segment-level performance vs expectations
+- The 3–5 KPIs that institutional investors track most closely (e.g. MAUs, ARPU, RPO, NRR)
+- Management guidance: what did they say about next quarter and full year?
+- Quality of the beat: organic growth vs one-time items?
+- Market reaction: how did the stock respond and why?
+- Most important thing management said on the earnings call`,
+
+  hedge: `## SECTION 8 — HEDGE FUND INVESTMENT THESIS
+Act as a seasoned hedge fund portfolio manager evaluating [TICKER]:
+
+WHY INSTITUTIONS WOULD BUY:
+- What is the long thesis in 3 bullet points?
+- What catalyst could unlock value?
+- What is the risk/reward ratio at current prices?
+
+WHY INSTITUTIONS WOULD AVOID OR SHORT:
+- What are the structural concerns?
+- Is there a better risk-adjusted alternative in the sector?
+- What does the bear case valuation look like?
+
+KEY CATALYSTS (next 12 months): List specific, dated, or quarter-specific catalysts.
+
+INVESTMENT THESIS: Write a 3-paragraph institutional-quality investment thesis.`,
+
+  debate: `## SECTION 9 — BULL VS BEAR ANALYST DEBATE
+Stage a structured debate between two senior analysts on [TICKER]:
+
+BULL ANALYST (3 arguments, each data-backed):
+- Core bull thesis
+- Underappreciated growth driver
+- Valuation argument for being cheap
+
+BEAR ANALYST (3 arguments, each data-backed):
+- Core structural risk
+- The consensus is wrong about...
+- Valuation argument for being expensive
+
+CROSS-EXAMINATION: Each analyst gets one rebuttal.
+
+BALANCED CONCLUSION: A neutral verdict on where the weight of evidence sits.`,
+
+  scenarios: `## SECTION 10 — BULL / BASE / BEAR SCENARIOS
+For [TICKER], construct 3 probability-weighted scenarios for the next 12–24 months:
+
+BULL CASE (probability: ~25%):
+- Key assumptions (revenue, margins, multiple)
+- Price target
+- What needs to go right
+
+BASE CASE (probability: ~50%):
+- Key assumptions
+- Price target
+- Most likely path
+
+BEAR CASE (probability: ~25%):
+- Key assumptions
+- Price target / downside scenario
+- What would trigger this
+
+Expected value calculation: weighted average of the 3 scenarios.`,
+
+  macro: `## SECTION 11 — MACRO & SECTOR TAILWINDS / HEADWINDS
+Analyze the macro and sector context for [TICKER]:
+- Which macro factors (rates, inflation, GDP, employment) most impact this business?
+- Is the sector in an early, mid, or late cycle?
+- What are the 3 biggest secular tailwinds for this company?
+- What are the 3 biggest secular headwinds?
+- How does this company perform in a recession vs expansion?
+- What happens to this stock if the Fed cuts / raises rates?
+- How does AI reshape the competitive dynamics in this sector?`,
+
+  insider: `## SECTION 12 — INSIDER ACTIVITY & INSTITUTIONAL FLOWS
+Analyze ownership and flow signals for [TICKER]:
+- Recent insider buying and selling (name, title, size, price)
+- 13F filings: which major hedge funds have been adding or exiting?
+- Short interest as a % of float — is it rising or falling?
+- Short squeeze potential?
+- Institutional ownership concentration — top 10 holders
+- Any unusual options activity that may signal informed positioning`,
+
+  technical: `## SECTION 13 — TECHNICAL PRICE STRUCTURE
+Analyze the technical setup for [TICKER]:
+- Current price vs 50-day, 200-day moving averages
+- Key support and resistance levels
+- Relative Strength vs S&P 500 (outperforming / underperforming)
+- Volume trends on up days vs down days
+- RSI, MACD positioning
+- Where is a high-probability entry / stop loss / target for a position?
+- Is the chart bullish, bearish, or neutral at this moment?`,
+
+  esg: `## SECTION 14 — ESG & GOVERNANCE FACTORS
+Evaluate [TICKER] on ESG and corporate governance:
+- Environmental footprint and carbon commitments (credible or green-washing?)
+- Social factors: employee relations, DEI, data privacy
+- Governance: board composition, dual-class shares, executive pay vs performance
+- ESG rating from major agencies (MSCI, Sustainalytics)
+- Are any ESG factors a material investment risk (stranded assets, regulatory fines)?
+- Do institutional ESG mandates restrict ownership?`,
+
+  catalyst: `## SECTION 15 — NEAR-TERM CATALYSTS CALENDAR
+List all potential stock-moving events for [TICKER] in the next 12 months:
+- Next earnings date and what to watch
+- Analyst days, investor conferences
+- Product launches or major partnerships expected
+- Regulatory decisions pending
+- Macro events that would particularly affect this company
+- M&A potential — acquirer or target?
+- Contract wins or renewal cycles
+Rate each catalyst: Magnitude (1–5) x Probability = Catalyst Score`,
+
+  options: `## SECTION 16 — OPTIONS MARKET & SENTIMENT SIGNALS
+Analyze what the options market is saying about [TICKER]:
+- Implied Volatility (IV) vs historical volatility — is the market pricing in a big move?
+- Put/Call ratio — bullish or bearish positioning?
+- Largest open interest strikes — where is the "max pain" level?
+- Any notable unusual options activity in recent weeks?
+- What does the term structure of IV tell us about expected near-term events?
+- Skew analysis: is the market paying up for puts or calls?`
+};
+
+const active = {};
+SECTIONS.forEach(s => { active[s.id] = s.default; });
+
+function renderSections(){
+  const grid = document.getElementById('sectionsGrid');
+  grid.innerHTML = '';
+  SECTIONS.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'section-chip' + (active[s.id] ? ' active' : '');
+    chip.innerHTML = `<div class="dot"></div><span>${s.label}</span>`;
+    chip.onclick = () => {
+      active[s.id] = !active[s.id];
+      chip.classList.toggle('active', active[s.id]);
+    };
+    grid.appendChild(chip);
+  });
+}
+renderSections();
+
+function generatePrompt(){
+  const raw = document.getElementById('tickerInput').value.trim().toUpperCase();
+  if(!raw){ document.getElementById('tickerInput').focus(); return; }
+  const ticker = raw.replace(/[^A-Z0-9.]/g,'');
+  const depth = document.getElementById('depthSelect').value;
+  const format = document.getElementById('formatSelect').value;
+  const selectedSections = SECTIONS.filter(s => active[s.id]);
+  const num = selectedSections.length;
+
+  let prompt = `════════════════════════════════════════════
+INSTITUTIONAL EQUITY RESEARCH PROMPT
+Ticker: ${ticker} | ${num} Sections | ${depth.charAt(0).toUpperCase()+depth.slice(1)} Depth
+Generated: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}
+════════════════════════════════════════════
+
+ANALYST ROLE & MANDATE:
+${DEPTH_CTX[depth]}
+
+OUTPUT FORMATTING DIRECTIVE:
+${FORMAT_CTX[format]}
+
+IMPORTANT: Replace all instances of [TICKER] with ${ticker} throughout your analysis. Where exact current financial data is required, use your most recent knowledge and note if figures may need verification. Present numbers in millions/billions with clear units. Use actual historical data wherever possible.
+
+════════════════════════════════════════════
+ANALYSIS SECTIONS
+════════════════════════════════════════════
+
+`;
+
+  let sectionNum = 1;
+  selectedSections.forEach(s => {
+    let text = SECTION_PROMPTS[s.id] || '';
+    text = text.replace(/\[TICKER\]/g, ticker);
+    const lines = text.split('\n');
+    const header = lines[0];
+    const body = lines.slice(1).join('\n');
+    const newHeader = header.replace(/SECTION \d+/, `SECTION ${sectionNum}`);
+    prompt += newHeader + '\n' + body + '\n\n';
+    sectionNum++;
+  });
+
+  prompt += `════════════════════════════════════════════
+SYNTHESIS & FINAL VERDICT
+════════════════════════════════════════════
+
+After completing all sections above, write a 200-word EXECUTIVE SUMMARY for ${ticker} that:
+1. States a clear investment conclusion (Strong Buy / Buy / Hold / Underperform / Sell)
+2. Summarizes the 3 strongest arguments for the thesis
+3. Names the single biggest risk that could invalidate the thesis
+4. Provides a 12-month price target with a high/low range
+5. Recommends position sizing relative to a diversified portfolio
+
+Format the final verdict as a RESEARCH RATING BOX:
+╔═══════════════════════════════╗
+║  ${ticker.padEnd(6)} │ Rating: [X] │ Target: $XXX  ║
+╚═══════════════════════════════╝
+
+════════════════════════════════════════════
+END OF RESEARCH MANDATE
+════════════════════════════════════════════`;
+
+  document.getElementById('outputTicker').textContent = ticker;
+  document.getElementById('outputMeta').textContent = `${num} section${num!==1?'s':''} · ${depth.charAt(0).toUpperCase()+depth.slice(1)} depth · ${format.charAt(0).toUpperCase()+format.slice(1)}`;
+  document.getElementById('promptText').textContent = prompt;
+  document.getElementById('charCount').textContent = `${prompt.length.toLocaleString()} characters · ~${Math.round(prompt.split(/\s+/).length/750)} min read`;
+  document.getElementById('outputCard').classList.add('visible');
+  document.getElementById('outputCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function copyPrompt(){
+  const text = document.getElementById('promptText').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.querySelector('.copy-btn.primary');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(()=>{ btn.textContent = orig; }, 1800);
+  });
+}
+
+function sendToChat(){
+  const text = document.getElementById('promptText').textContent;
+  sendPrompt(text);
+}
+
+document.getElementById('tickerInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') generatePrompt();
+});
+</script>
